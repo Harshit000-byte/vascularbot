@@ -318,11 +318,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <p className="text-[11px] text-slate-400 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
             {isHeartbeatActive ? (
               <span className="text-rose-300 font-medium">
-                Pulse active! Blood velocity spiked by {heartbeatMultiplier}x. Moving against flow penalty <code className="text-rose-400 font-mono">e^(k&middot;v)</code> is surging, forcing Dijkstra to recalculate live!
+                Pulse active! Arterial stress is elevated by {heartbeatMultiplier}x, increasing turbulence and the counter-flow penalty <code className="text-rose-400 font-mono">e^(k&middot;v)</code>. Dijkstra recalculates live and takes a lower-cost collateral route when available.
               </span>
             ) : (
               <span>
-                Toggle pulse to simulate systolic ejection. High-velocity arteries will become exponentially harder to traverse, prompting dynamic path rerouting.
+                Toggle pulse to simulate systolic ejection. Arterial turbulence and counter-flow costs rise, so Dijkstra can reroute through lower-stress collateral vessels.
               </span>
             )}
           </p>

@@ -1,6 +1,36 @@
 import { VascularNetwork } from '../types/vascular';
 import { cardiacCoronaryNetwork } from './cardiacNetwork';
 
+/** Small classroom graph with transparent weights and a non-obvious shortest route. */
+export const dijkstraClassroomNetwork: VascularNetwork = {
+  id: 'dijkstra_classroom',
+  name: 'Dijkstra Classroom Example (6 nodes)',
+  description: 'A small weighted graph for learning tentative distances, greedy selection, edge relaxation, and predecessor tracing.',
+  defaultStartId: 'teach_s',
+  defaultTargetId: 'teach_t',
+  nodes: [
+    { id: 'teach_s', x: 80, y: 300, type: 'injection_site', label: 'Start (S)' },
+    { id: 'teach_a', x: 290, y: 170, type: 'artery', label: 'Node A' },
+    { id: 'teach_b', x: 290, y: 430, type: 'artery', label: 'Node B' },
+    { id: 'teach_c', x: 520, y: 170, type: 'artery', label: 'Node C' },
+    { id: 'teach_d', x: 520, y: 430, type: 'artery', label: 'Node D' },
+    { id: 'teach_t', x: 780, y: 300, type: 'tumor', label: 'Target (T)' }
+  ],
+  edges: [
+    { source: 'teach_s', target: 'teach_a', length: 4, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'S—A (4)' },
+    { source: 'teach_s', target: 'teach_b', length: 2, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'S—B (2)' },
+    { source: 'teach_b', target: 'teach_a', length: 1, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'B—A (1)' },
+    { source: 'teach_a', target: 'teach_c', length: 5, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'A—C (5)' },
+    { source: 'teach_b', target: 'teach_c', length: 8, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'B—C (8)' },
+    { source: 'teach_b', target: 'teach_d', length: 10, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'B—D (10)' },
+    { source: 'teach_a', target: 'teach_d', length: 20, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'A—D (20)' },
+    { source: 'teach_c', target: 'teach_d', length: 2, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'C—D (2)' },
+    { source: 'teach_c', target: 'teach_t', length: 6, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'C—T (6)' },
+    { source: 'teach_d', target: 'teach_t', length: 3, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'D—T (3)' },
+    { source: 'teach_a', target: 'teach_t', length: 20, radius: 1, blood_velocity: 0, flow_direction: 'source_to_target', type: 'artery', name: 'A—T (20)' }
+  ]
+};
+
 /**
  * Preset 1: Cerebral Microcirculation & Circle of Willis
  * Features high-velocity carotid arterial flow vs collateral cortical venous shunts.
@@ -385,6 +415,7 @@ export const hepaticNetwork: VascularNetwork = {
 export { cardiacCoronaryNetwork };
 
 export const PRESET_NETWORKS: VascularNetwork[] = [
+  dijkstraClassroomNetwork,
   cardiacCoronaryNetwork,
   cerebralNetwork,
   coronaryNetwork,

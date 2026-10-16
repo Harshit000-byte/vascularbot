@@ -4,6 +4,9 @@
 
 Unlike standard shortest-path algorithms that consider only Euclidean distance, VascularBot implements a custom **Hemodynamic Dijkstra's Algorithm** where edge traversal weights reflect the actual biophysical energy cost of fluid dynamic resistance and counter-current hemodynamics.
 
+### Classroom walkthrough
+The app opens with a six-node teaching graph: edge labels are weights, and node labels show each best-known distance from the start. Use **Next** to reveal one action at a time, including both successful and rejected distance updates; use **Play lesson** for a paced automatic walkthrough. At the end, the final route is revealed. Choose a cardiac network from the selector afterward to demonstrate how heartbeat stress can change route costs.
+
 ---
 
 ## ⚡ Mathematical & Biophysical Model
@@ -20,9 +23,9 @@ Where the directional hemodynamic penalty is:
 
 ### Systolic Heartbeat Pulse Dynamics
 When the cardiac cycle enters **systole** (or when the user engages the **Heartbeat Pulse** toggle):
-1. Blood velocity spikes by a multiplier factor (e.g., $2.5\times$).
-2. Traversal penalty for moving against high-pressure arterial flow surges exponentially ($\exp(k \cdot v)$).
-3. The Dijkstra engine recalculates in real-time, dynamically rerouting the nanobot through lower-velocity bypass veins, sinusoids, or collateral pathways to preserve energy.
+1. Arterial blood velocity spikes by the selected multiplier (e.g., $2.5\times$); venous return remains at baseline.
+2. Counter-flow arterial segments receive the exponential penalty ($\exp(k \cdot v_{\mathrm{eff}})$), and arterial turbulence adds a stress surcharge of $2v\max(0, m - 1)$, where $m$ is the pulse multiplier. With-flow veins are not surcharged.
+3. The Dijkstra engine recalculates in real time and selects a lower-cost bypass or collateral route when one exists; the running nanobot continues from the nearest point on its new route.
 
 ---
 

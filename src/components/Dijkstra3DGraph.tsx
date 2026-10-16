@@ -21,7 +21,7 @@ interface Dijkstra3DGraphProps {
   onSelectNode: (nodeId: string) => void;
 }
 
-const shortId = (id: string) => id.replace(/^(node_|cor_|hep_|cc_)/, '').replaceAll('_', ' ');
+const shortId = (id: string) => id.replace(/^(node_|cor_|hep_|cc_|teach_)/, '').replaceAll('_', ' ');
 
 function createHeartSilhouette() {
   const shape = new Shape();
@@ -92,6 +92,7 @@ function HeartAnatomy({ isHeartbeatActive, scale }: { isHeartbeatActive: boolean
 
 function GraphScene({ nodes, edges, result, step, startNodeId, targetNodeId, isHeartbeatActive, selectedNodeId, nanobotPos, onSelectNode }: Dijkstra3DGraphProps) {
   const isCardiacNetwork = nodes.some(node => node.id.startsWith('cc_'));
+  const isClassroomNetwork = nodes.some(node => node.id.startsWith('teach_'));
   const cardiacScale = 12 / 900;
   const layout = useMemo(() => {
     if (!nodes.length) return new Map<string, [number, number, number]>();
@@ -127,6 +128,7 @@ function GraphScene({ nodes, edges, result, step, startNodeId, targetNodeId, isH
   const finalPathEdges = useMemo(() => {
     return new Set(result.path.slice(1).map((nodeId, index) => `${result.path[index]}:${nodeId}`));
   }, [result.path]);
+  const showFinalPath = step?.phase === 'complete';
 
   const settledTreeEdges = useMemo(() => {
     if (!step) return new Set<string>();
@@ -177,7 +179,7 @@ function GraphScene({ nodes, edges, result, step, startNodeId, targetNodeId, isH
         const reverseId = `${edge.target}:${edge.source}`;
         const isActive = activeEdge?.source === edge.source && activeEdge?.target === edge.target
           || activeEdge?.source === edge.target && activeEdge?.target === edge.source;
-        const isFinalPath = finalPathEdges.has(edgeId) || finalPathEdges.has(reverseId);
+        const isFinalPath = showFinalPath && (finalPathEdges.has(edgeId) || finalPathEdges.has(reverseId));
         const isTreeEdge = settledTreeEdges.has(edgeId) || settledTreeEdges.has(reverseId);
         const edgeColor = isActive ? '#ffd080' : isFinalPath ? '#75f3c4' : isTreeEdge ? '#55cbb1' : edge.type === 'vein' ? '#477bb5' : '#9b5465';
         const midpoint: [number, number, number] = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2 + 0.04, (from[2] + to[2]) / 2];
@@ -192,6 +194,19 @@ function GraphScene({ nodes, edges, result, step, startNodeId, targetNodeId, isH
               transparent
               opacity={isActive || isFinalPath || isTreeEdge ? 0.95 : 0.55}
             />
+            {isClassroomNetwork && (
+              <Text
+                position={[midpoint[0], midpoint[1] + 0.2, midpoint[2]]}
+                fontSize={0.14}
+                color="#ffe6a8"
+                outlineWidth={0.012}
+                outlineColor="#07101b"
+                anchorX="center"
+                anchorY="middle"
+              >
+                {edge.length.toFixed(0)}
+              </Text>
+            )}
             {(isActive || isFinalPath) && (
               <mesh position={midpoint}>
                 <sphereGeometry args={[isActive ? 0.055 : 0.04, 12, 12]} />

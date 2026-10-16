@@ -34,7 +34,7 @@ export default function VascularBotPage() {
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
   const [isPresentationOpen, setIsPresentationOpen] = useState(false);
   const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('graph');
-  const [stepIndex, setStepIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(-1);
   const [isTeachingPlaying, setIsTeachingPlaying] = useState(false);
 
   const {
@@ -94,14 +94,14 @@ export default function VascularBotPage() {
       const nextStep = Math.min(stepIndex + 1, dijkstraResult.steps.length - 1);
       setStepIndex(nextStep);
       if (nextStep >= dijkstraResult.steps.length - 1) setIsTeachingPlaying(false);
-    }, 1100);
+    }, 1800);
     return () => window.clearTimeout(timer);
   }, [isTeachingPlaying, stepIndex, dijkstraResult.steps.length]);
 
   const safeStepIndex = Math.max(-1, Math.min(stepIndex, dijkstraResult.steps.length - 1));
   const currentStep = safeStepIndex >= 0 ? dijkstraResult.steps[safeStepIndex] : undefined;
   const resetTeaching = () => {
-    setStepIndex(0);
+    setStepIndex(-1);
     setIsTeachingPlaying(false);
   };
   const toggleTeaching = () => {
@@ -144,7 +144,9 @@ export default function VascularBotPage() {
               <div className="visual-heading">
                 <span className="section-kicker"><BookOpen size={13} /> THE SEARCH, IN MOTION</span>
                 <h1>Finding the <em>lowest-cost</em> route</h1>
-                <p>Each glowing label is the best-known distance from the source. Watch them improve.</p>
+                <p>{network.id === 'dijkstra_classroom'
+                  ? 'Numbers on edges are weights; numbers by nodes are best-known distances from S.'
+                  : 'Each glowing label is the best-known distance from the source. Watch them improve.'}</p>
               </div>
               <div className="view-switch" role="tablist" aria-label="Visualization mode">
                 <button className={visualizationMode === 'graph' ? 'active' : ''} onClick={() => setVisualizationMode('graph')} role="tab" aria-selected={visualizationMode === 'graph'}>

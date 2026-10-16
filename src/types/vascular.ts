@@ -24,6 +24,7 @@ export interface VascularEdge {
 }
 
 export interface DijkstraStep {
+  phase?: 'settle' | 'relax' | 'complete';
   currentNodeId: string;
   visitedNodes: string[];
   distances: Record<string, number>;
@@ -33,6 +34,9 @@ export interface DijkstraStep {
     target: string;
     cost: number;
     penalty: number;
+    previousDistance?: number;
+    candidateDistance?: number;
+    wasUpdated?: boolean;
   };
 }
 

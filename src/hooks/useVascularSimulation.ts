@@ -50,6 +50,7 @@ export function useVascularSimulation({
 
   // Path history to detect changes
   const prevPathRef = useRef<string[]>([]);
+  const animationPathRef = useRef<string[]>([]);
   const animationFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
 
@@ -92,6 +93,50 @@ export function useVascularSimulation({
     network.nodes.forEach(n => map.set(n.id, n));
     return map;
   }, [network.nodes]);
+
+  // If systolic stress changes the route mid-run, continue from the closest
+  // point on the new route rather than reusing an invalid index or teleporting
+  // back to the beginning of the path.
+  useEffect(() => {
+    const previousPath = animationPathRef.current;
+    const nextPath = dijkstraResult.path;
+    const pathChanged = previousPath.length > 0 && previousPath.join('->') !== nextPath.join('->');
+
+    if (pathChanged && isRunning && nanobotPos && nextPath.length > 1) {
+      let nearestIndex = 0;
+      let nearestProgress = 0;
+      let nearestDistance = Infinity;
+
+      for (let i = 0; i < nextPath.length - 1; i++) {
+        const from = nodeMap.get(nextPath[i]);
+        const to = nodeMap.get(nextPath[i + 1]);
+        if (!from || !to) continue;
+
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const lengthSquared = dx * dx + dy * dy;
+        const projection = lengthSquared === 0
+          ? 0
+          : Math.min(1, Math.max(0, ((nanobotPos.x - from.x) * dx + (nanobotPos.y - from.y) * dy) / lengthSquared));
+        const projectedX = from.x + projection * dx;
+        const projectedY = from.y + projection * dy;
+        const distance = Math.hypot(nanobotPos.x - projectedX, nanobotPos.y - projectedY);
+
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = i;
+          nearestProgress = projection;
+        }
+      }
+
+      requestAnimationFrame(() => {
+        setCurrentPathIndex(nearestIndex);
+        setEdgeProgress(nearestProgress);
+      });
+    }
+
+    animationPathRef.current = nextPath;
+  }, [dijkstraResult.path, isRunning, nanobotPos, nodeMap]);
 
   // Reset simulation
   const resetSimulation = useCallback(() => {

@@ -13,7 +13,8 @@ export function calculateEdgeCost(
   k: number = 0.5,
   velocityMultiplier: number = 1.0
 ): { cost: number; penalty: number; isWithFlow: boolean; effectiveVelocity: number } {
-  const effectiveVelocity = edge.blood_velocity * velocityMultiplier;
+  // Systolic pressure surges arterial flow; venous return remains at baseline.
+  const effectiveVelocity = edge.blood_velocity * (edge.type === 'vein' ? 1 : velocityMultiplier);
   
   // Determine if moving with or against the blood flow
   let isWithFlow = true;
@@ -24,10 +25,17 @@ export function calculateEdgeCost(
   }
 
   const penalty = isWithFlow ? 1.0 : Math.exp(k * effectiveVelocity);
+
+  // A pulse also increases arterial turbulence, even when traveling with flow.
+  // Without this term, a with-flow arterial route has identical cost at rest
+  // and during systole, so the heartbeat cannot trigger a route recalculation.
+  const arterialStressCost = edge.type === 'artery'
+    ? edge.blood_velocity * Math.max(0, velocityMultiplier - 1) * 2
+    : 0;
   
   // Guard against radius <= 0
   const safeRadius = Math.max(edge.radius, 0.1);
-  const cost = (edge.length / (safeRadius * safeRadius)) * penalty;
+  const cost = (edge.length / (safeRadius * safeRadius)) * penalty + arterialStressCost;
 
   return {
     cost,
@@ -167,6 +175,7 @@ export function runVascularDijkstra(
 
     if (recordSteps) {
       steps.push({
+        phase: 'settle',
         currentNodeId: u,
         visitedNodes: Array.from(visited),
         distances: { ...distances },
@@ -186,27 +195,36 @@ export function runVascularDijkstra(
 
       const { cost, penalty } = calculateEdgeCost(edge, u, v, k, velocityMultiplier);
       const newDist = currentDist + cost;
+      const previousDistance = distances[v];
+      const wasUpdated = newDist < previousDistance;
 
-      if (newDist < distances[v]) {
+      if (wasUpdated) {
         distances[v] = newDist;
         previousNode[v] = u;
         previousEdge[v] = edge;
         pq.push(v, newDist);
 
-        if (recordSteps) {
-          steps.push({
-            currentNodeId: u,
-            visitedNodes: Array.from(visited),
-            distances: { ...distances },
-            previous: { ...previousNode },
-            evaluatedEdge: {
-              source: u,
-              target: v,
-              cost,
-              penalty
-            }
-          });
-        }
+      }
+
+      // Record every attempted relaxation, including candidates that lose.
+      // Showing both outcomes is essential for explaining the comparison step.
+      if (recordSteps) {
+        steps.push({
+          phase: 'relax',
+          currentNodeId: u,
+          visitedNodes: Array.from(visited),
+          distances: { ...distances },
+          previous: { ...previousNode },
+          evaluatedEdge: {
+            source: u,
+            target: v,
+            cost,
+            penalty,
+            previousDistance,
+            candidateDistance: newDist,
+            wasUpdated
+          }
+        });
       }
     }
   }
@@ -230,6 +248,16 @@ export function runVascularDijkstra(
   // Total physical distance along the chosen path
   const totalDistance = traversedEdges.reduce((sum, e) => sum + e.length, 0);
   const totalCost = distances[targetId] === Infinity ? 0 : distances[targetId];
+
+  if (recordSteps) {
+    steps.push({
+      phase: 'complete',
+      currentNodeId: targetId,
+      visitedNodes: Array.from(visited),
+      distances: { ...distances },
+      previous: { ...previousNode }
+    });
+  }
 
   return {
     path,
