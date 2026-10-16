@@ -149,11 +149,23 @@ export const VascularCanvas: React.FC<VascularCanvasProps> = ({
     }
   }, [isHeartbeatActive, startNodeId, nodeMap]);
 
-  // Reset view to fit all nodes
+  // Reset view to fit all nodes or focus heart
   const handleResetView = useCallback(() => {
     if (nodes.length === 0 || !containerRef.current) return;
     const { clientWidth: w, clientHeight: h } = containerRef.current;
     
+    if (isHeartNetwork) {
+      // Prominently center and enlarge the anatomical heart model
+      const targetHeartWidth = 460;
+      const targetHeartHeight = 500;
+      const scale = Math.min((w - 40) / targetHeartWidth, (h - 40) / targetHeartHeight, 1.95);
+      const chosenScale = Math.max(scale, 1.35);
+      const offsetX = w / 2 - 445 * chosenScale;
+      const offsetY = h / 2 - 340 * chosenScale;
+      setTransform({ x: offsetX, y: offsetY, k: chosenScale });
+      return;
+    }
+
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     nodes.forEach(n => {
       minX = Math.min(minX, n.x);
@@ -164,16 +176,18 @@ export const VascularCanvas: React.FC<VascularCanvasProps> = ({
 
     const netWidth = maxX - minX + 160;
     const netHeight = maxY - minY + 160;
-    const scale = Math.min(w / netWidth, h / netHeight, 1.25);
+    const scale = Math.min(w / netWidth, h / netHeight, 1.4);
     const offsetX = (w - (maxX + minX) * scale) / 2;
     const offsetY = (h - (maxY + minY) * scale) / 2;
 
     setTransform({ x: offsetX, y: offsetY, k: scale });
-  }, [nodes]);
+  }, [nodes, isHeartNetwork]);
 
   // Auto center on initial mount or network load
   useEffect(() => {
     handleResetView();
+    const t = setTimeout(handleResetView, 80);
+    return () => clearTimeout(t);
   }, [handleResetView]);
 
   // Zoom handlers
@@ -485,12 +499,48 @@ export const VascularCanvas: React.FC<VascularCanvasProps> = ({
         ctx.stroke();
         ctx.restore();
 
-        // Optional vessel labels (radius, velocity)
-        if (showVesselLabels) {
+        // Clear anatomical labels for major arterial branches
+        const isMajorVessel = edge.name && (
+          edge.name.includes('LAD') ||
+          edge.name.includes('LCx') ||
+          edge.name.includes('RCA') ||
+          edge.name.includes('Aortic') ||
+          edge.name.includes('LMCA') ||
+          edge.name.includes('Diagonal') ||
+          edge.name.includes('Perforator') ||
+          edge.name.includes('Marginal')
+        );
+
+        if (showVesselLabels || (isHeartNetwork && isMajorVessel)) {
           ctx.save();
-          ctx.fillStyle = 'rgba(226, 232, 240, 0.75)';
-          ctx.font = '10px monospace';
-          ctx.fillText(`r:${edge.radius} v:${edge.blood_velocity}`, midX + 6, midY - 6);
+          const labelText = edge.name
+            ? edge.name.replace(' Segment', '').replace('First ', '').replace('Second ', '')
+            : `r:${edge.radius} v:${edge.blood_velocity}`;
+
+          ctx.font = 'bold 9.5px monospace';
+          const textMetrics = ctx.measureText(labelText);
+          const bgWidth = textMetrics.width + 10;
+          const bgHeight = 15;
+
+          // High-contrast translucent badge background
+          ctx.fillStyle = isArtery ? 'rgba(15, 23, 42, 0.92)' : 'rgba(15, 23, 42, 0.92)';
+          ctx.strokeStyle = isArtery ? 'rgba(244, 63, 94, 0.85)' : 'rgba(59, 130, 246, 0.85)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(midX - bgWidth / 2, midY - bgHeight - 4, bgWidth, bgHeight, 4);
+          ctx.fill();
+          ctx.stroke();
+
+          // Flow indicator dot
+          ctx.beginPath();
+          ctx.arc(midX - bgWidth / 2 + 5, midY - bgHeight / 2 - 4, 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = isArtery ? '#ef4444' : '#3b82f6';
+          ctx.fill();
+
+          ctx.fillStyle = isArtery ? '#fecdd3' : '#bfdbfe';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(labelText, midX + 3, midY - bgHeight / 2 - 4);
           ctx.restore();
         }
 
@@ -709,13 +759,48 @@ export const VascularCanvas: React.FC<VascularCanvasProps> = ({
           ctx.setLineDash([]);
         }
 
-        // Node Label
-        if (node.label) {
-          ctx.fillStyle = isInOptimalPath ? '#6ee7b7' : 'rgba(226, 232, 240, 0.85)';
-          ctx.font = '11px sans-serif';
+        // Only draw node labels for key endpoints or when explicitly toggled or hovered
+        const isKeyNode = isStart || isTarget || node.type === 'injection_site' || node.type === 'tumor';
+        const shouldShowLabel = isHovered || isSelected || isKeyNode || showVesselLabels;
+
+        if (node.label && shouldShowLabel) {
+          ctx.save();
+          const labelText = node.label;
+          ctx.font = isKeyNode ? 'bold 11px monospace' : '9.5px monospace';
+          const textMetrics = ctx.measureText(labelText);
+          const bgW = textMetrics.width + 10;
+          const bgH = isKeyNode ? 18 : 14;
+
+          // Draw dark frosted background pill for legibility
+          ctx.fillStyle = isStart
+            ? 'rgba(4, 47, 46, 0.92)'
+            : isTarget
+            ? 'rgba(76, 5, 25, 0.92)'
+            : 'rgba(15, 23, 42, 0.88)';
+          ctx.strokeStyle = isStart
+            ? '#14b8a6'
+            : isTarget
+            ? '#f43f5e'
+            : isInOptimalPath
+            ? '#10b981'
+            : 'rgba(148, 163, 184, 0.5)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(node.x - bgW / 2, node.y + (isKeyNode ? 18 : 14), bgW, bgH, 4);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = isStart
+            ? '#5eead4'
+            : isTarget
+            ? '#fda4af'
+            : isInOptimalPath
+            ? '#6ee7b7'
+            : '#e2e8f0';
           ctx.textAlign = 'center';
-          ctx.shadowBlur = 0;
-          ctx.fillText(node.label, node.x, node.y + 24);
+          ctx.textBaseline = 'middle';
+          ctx.fillText(labelText, node.x, node.y + (isKeyNode ? 18 : 14) + bgH / 2);
+          ctx.restore();
         }
 
         ctx.restore();
@@ -825,7 +910,7 @@ export const VascularCanvas: React.FC<VascularCanvasProps> = ({
             width={900}
             height={650}
             isHeartbeatActive={isHeartbeatActive}
-            showLabels={showVesselLabels}
+            showLabels={true}
           />
         </div>
       )}
@@ -950,6 +1035,23 @@ export const VascularCanvas: React.FC<VascularCanvasProps> = ({
               <span className="w-2.5 h-2.5 rounded-full bg-rose-700 ring-2 ring-rose-500 animate-pulse" />
               <span>Target Tumor</span>
             </div>
+
+            {isHeartNetwork && (
+              <div className="col-span-2 mt-2 pt-1.5 border-t border-slate-800/80 space-y-1 text-[10.5px]">
+                <div className="text-cyan-300 font-bold tracking-wider uppercase flex items-center gap-1">
+                  <span>Coronary Inflow / Flow Routes:</span>
+                </div>
+                <div className="text-slate-300">
+                  <strong className="text-rose-400">LAD:</strong> Descends anterior interventricular groove &rarr; Apex
+                </div>
+                <div className="text-slate-300">
+                  <strong className="text-rose-400">LCx:</strong> Wraps lateral left groove &rarr; Tumor Feeders
+                </div>
+                <div className="text-slate-300">
+                  <strong className="text-rose-400">RCA:</strong> Descends right AV groove &rarr; PDA
+                </div>
+              </div>
+            )}
           </div>
           <p className="mt-2 text-[10px] text-slate-400 border-t border-slate-800 pt-1.5 leading-relaxed">
             Move WITH flow = 1x penalty. Move AGAINST flow = e^(k &middot; v) penalty.

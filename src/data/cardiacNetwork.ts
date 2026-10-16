@@ -18,50 +18,48 @@ export const cardiacCoronaryNetwork: VascularNetwork = {
   defaultTargetId: 'cc_tumor',
   nodes: [
     // ─── Injection Site ─────────────────────────────────────────────────
-    { id: 'cc_aortic_root', x: 445, y: 165, type: 'injection_site', label: 'Aortic Root Catheter' },
+    { id: 'cc_aortic_root', x: 445, y: 130, type: 'injection_site', label: 'Aortic Catheter Port' },
 
-    // ─── Aortic Arch ────────────────────────────────────────────────────
-    { id: 'cc_aorta_asc', x: 455, y: 185, type: 'artery', label: 'Ascending Aorta' },
+    // ─── Aortic Root & LMCA Takeoff ─────────────────────────────────────
+    { id: 'cc_aorta_asc', x: 445, y: 165, type: 'artery', label: 'Ascending Aorta' },
+    { id: 'cc_lmca', x: 405, y: 185, type: 'artery', label: 'LMCA Trunk' },
 
-    // ─── Left Main Coronary Artery (LMCA) ───────────────────────────────
-    { id: 'cc_lmca', x: 420, y: 200, type: 'artery', label: 'Left Main Coronary' },
+    // ─── Left Anterior Descending (LAD) — down anterior sulcus to apex ─
+    { id: 'cc_lad_prox', x: 418, y: 220, type: 'artery', label: 'Proximal LAD' },
+    { id: 'cc_lad_d1', x: 355, y: 265, type: 'artery', label: 'Diagonal D1' },
+    { id: 'cc_lad_mid', x: 422, y: 310, type: 'artery', label: 'Mid LAD' },
+    { id: 'cc_lad_d2', x: 370, y: 365, type: 'artery', label: 'Diagonal D2' },
+    { id: 'cc_lad_dist', x: 430, y: 415, type: 'artery', label: 'Distal LAD' },
+    { id: 'cc_lad_apex', x: 442, y: 510, type: 'artery', label: 'LAD Apex' },
 
-    // ─── Left Anterior Descending (LAD) — runs down interventricular groove
-    { id: 'cc_lad_prox', x: 395, y: 225, type: 'artery', label: 'Proximal LAD' },
-    { id: 'cc_lad_d1', x: 355, y: 255, type: 'artery', label: 'Diagonal D1 Branch' },
-    { id: 'cc_lad_mid', x: 390, y: 285, type: 'artery', label: 'Mid LAD' },
-    { id: 'cc_lad_d2', x: 345, y: 305, type: 'artery', label: 'Diagonal D2 Branch' },
-    { id: 'cc_lad_dist', x: 400, y: 345, type: 'artery', label: 'Distal LAD' },
-    { id: 'cc_lad_apex', x: 415, y: 405, type: 'artery', label: 'Apical LAD' },
+    // ─── Circumflex Artery (LCx) — wraps around lateral LV wall ────────
+    { id: 'cc_lcx_prox', x: 368, y: 195, type: 'artery', label: 'Proximal LCx' },
+    { id: 'cc_lcx_om1', x: 305, y: 245, type: 'artery', label: 'Obtuse Marginal 1' },
+    { id: 'cc_lcx_mid', x: 275, y: 310, type: 'artery', label: 'Mid LCx' },
+    { id: 'cc_lcx_om2', x: 260, y: 380, type: 'artery', label: 'Obtuse Marginal 2' },
+    { id: 'cc_lcx_dist', x: 285, y: 440, type: 'artery', label: 'Distal LCx' },
+    { id: 'cc_pla_lcx', x: 325, y: 480, type: 'artery', label: 'Posterolateral Artery' },
 
-    // ─── Circumflex Artery (LCx) — runs in left AV groove
-    { id: 'cc_lcx_prox', x: 410, y: 210, type: 'artery', label: 'Proximal LCx' },
-    { id: 'cc_lcx_om1', x: 350, y: 235, type: 'artery', label: 'Obtuse Marginal 1 (OM1)' },
-    { id: 'cc_lcx_mid', x: 330, y: 275, type: 'artery', label: 'Mid LCx' },
-    { id: 'cc_lcx_om2', x: 295, y: 305, type: 'artery', label: 'Obtuse Marginal 2 (OM2)' },
-    { id: 'cc_lcx_dist', x: 305, y: 350, type: 'artery', label: 'Distal LCx' },
-    { id: 'cc_pla_lcx', x: 330, y: 400, type: 'artery', label: 'PLA (LCx Dominant)' },
+    // ─── Right Coronary Artery (RCA) — down right AV sulcus to PDA ─────
+    { id: 'cc_rca_prox', x: 495, y: 185, type: 'artery', label: 'Proximal RCA' },
+    { id: 'cc_rca_conus', x: 550, y: 205, type: 'artery', label: 'Conus Branch' },
+    { id: 'cc_rca_mid', x: 535, y: 270, type: 'artery', label: 'Mid RCA' },
+    { id: 'cc_rca_am', x: 595, y: 330, type: 'artery', label: 'Acute Marginal' },
+    { id: 'cc_rca_dist', x: 540, y: 395, type: 'artery', label: 'Distal RCA' },
+    { id: 'cc_pda', x: 475, y: 475, type: 'artery', label: 'Posterior Descending' },
+    { id: 'cc_plv', x: 510, y: 450, type: 'artery', label: 'PLV Branch' },
 
-    // ─── Right Coronary Artery (RCA) — runs in right AV groove
-    { id: 'cc_rca_prox', x: 490, y: 200, type: 'artery', label: 'Proximal RCA' },
-    { id: 'cc_rca_conus', x: 525, y: 215, type: 'artery', label: 'Conus Branch' },
-    { id: 'cc_rca_mid', x: 505, y: 255, type: 'artery', label: 'Mid RCA (Acute Marginal)' },
-    { id: 'cc_rca_am', x: 545, y: 285, type: 'artery', label: 'Acute Marginal Branch' },
-    { id: 'cc_rca_dist', x: 510, y: 310, type: 'artery', label: 'Distal RCA' },
-    { id: 'cc_pda', x: 465, y: 365, type: 'artery', label: 'Posterior Descending Art.' },
-    { id: 'cc_plv', x: 490, y: 400, type: 'artery', label: 'Posterolateral (PLV)' },
-
-    // ─── Coronary Sinus / Venous Return ─────────────────────────────────
-    { id: 'cc_grcv', x: 380, y: 185, type: 'vein', label: 'Great Cardiac Vein' },
-    { id: 'cc_cs', x: 420, y: 175, type: 'vein', label: 'Coronary Sinus' },
-    { id: 'cc_mrcv', x: 490, y: 185, type: 'vein', label: 'Middle Cardiac Vein' },
+    // ─── Coronary Venous Return ─────────────────────────────────────────
+    { id: 'cc_grcv', x: 350, y: 170, type: 'vein', label: 'Great Cardiac Vein' },
+    { id: 'cc_cs', x: 430, y: 155, type: 'vein', label: 'Coronary Sinus' },
+    { id: 'cc_mrcv', x: 515, y: 170, type: 'vein', label: 'Middle Cardiac Vein' },
 
     // ─── Septal Perforators ──────────────────────────────────────────────
-    { id: 'cc_sept1', x: 435, y: 310, type: 'artery', label: 'Septal Perforator 1' },
-    { id: 'cc_sept2', x: 440, y: 370, type: 'artery', label: 'Septal Perforator 2' },
+    { id: 'cc_sept1', x: 428, y: 345, type: 'artery', label: 'Septal Perforator 1' },
+    { id: 'cc_sept2', x: 436, y: 440, type: 'artery', label: 'Septal Perforator 2' },
 
-    // ─── Target Tumor (Myocardial Mass — posterior LV wall) ─────────────
-    { id: 'cc_tumor', x: 348, y: 430, type: 'tumor', label: 'Cardiac Myxoma (LV Posterior Wall)' }
+    // ─── Target Tumor (Myocardial Mass — LV wall) ────────────────────────
+    { id: 'cc_tumor', x: 335, y: 435, type: 'tumor', label: 'Target Cardiac Tumor' }
   ],
 
   edges: [

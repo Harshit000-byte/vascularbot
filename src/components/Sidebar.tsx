@@ -119,19 +119,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <aside className="w-full h-full bg-[#0b1120] border-l border-slate-800 flex flex-col text-slate-200 select-none overflow-hidden">
       {/* 1. Header: Branding & Controls */}
       <div className="p-4 border-b border-slate-800 bg-[#0d1527] flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 text-white font-black tracking-wider">
-            VB
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-white">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_#22d3ee]" />
+            Experiment controls
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <h1 className="font-extrabold text-base tracking-tight text-white">VascularBot</h1>
-              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-cyan-950 text-cyan-400 border border-cyan-800/80">
-                v2.4
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400">Hemodynamic Dijkstra Engine</p>
-          </div>
+          <p className="text-[11px] text-slate-400 mt-1">Tune the network and compare routes</p>
         </div>
 
         <div className="flex items-center gap-1">
